@@ -1,0 +1,156 @@
+[
+  {
+    "query": "SELECT COUNT(*) AS customers, SUM(churn) AS churners,\n       ROUND(100.0 * SUM(churn) / COUNT(*), 2) AS churn_rate_pct\nFROM customers",
+    "rows": [
+      {
+        "customers": 3150,
+        "churners": 495,
+        "churn_rate_pct": 15.71
+      }
+    ]
+  },
+  {
+    "query": "SELECT tariff_plan, COUNT(*) AS customers, SUM(churn) AS churners,\n       ROUND(100.0 * SUM(churn) / COUNT(*), 2) AS churn_rate_pct\nFROM customers GROUP BY tariff_plan",
+    "rows": [
+      {
+        "tariff_plan": 1,
+        "customers": 2905,
+        "churners": 489,
+        "churn_rate_pct": 16.83
+      },
+      {
+        "tariff_plan": 2,
+        "customers": 245,
+        "churners": 6,
+        "churn_rate_pct": 2.45
+      }
+    ]
+  },
+  {
+    "query": "SELECT complains, COUNT(*) AS customers, SUM(churn) AS churners,\n       ROUND(100.0 * SUM(churn) / COUNT(*), 2) AS churn_rate_pct\nFROM customers GROUP BY complains",
+    "rows": [
+      {
+        "complains": 0,
+        "customers": 2909,
+        "churners": 295,
+        "churn_rate_pct": 10.14
+      },
+      {
+        "complains": 1,
+        "customers": 241,
+        "churners": 200,
+        "churn_rate_pct": 82.99
+      }
+    ]
+  },
+  {
+    "query": "SELECT tariff_plan, COUNT(*) AS customers, SUM(churn) AS churners\nFROM customers WHERE complains = 1\nGROUP BY tariff_plan HAVING COUNT(*) >= 20",
+    "rows": [
+      {
+        "tariff_plan": 1,
+        "customers": 222,
+        "churners": 194
+      }
+    ]
+  },
+  {
+    "query": "SELECT CASE WHEN frequency_of_use < 20 THEN 'Under 20 calls'\n            WHEN frequency_of_use < 100 THEN '20-99 calls'\n            ELSE '100+ calls' END AS usage_band,\n       COUNT(*) AS customers, ROUND(100.0 * AVG(churn), 2) AS churn_rate_pct\nFROM customers GROUP BY usage_band",
+    "rows": [
+      {
+        "usage_band": "100+ calls",
+        "customers": 719,
+        "churn_rate_pct": 0.28
+      },
+      {
+        "usage_band": "20-99 calls",
+        "customers": 1853,
+        "churn_rate_pct": 14.25
+      },
+      {
+        "usage_band": "Under 20 calls",
+        "customers": 578,
+        "churn_rate_pct": 39.62
+      }
+    ]
+  },
+  {
+    "query": "WITH ranked AS (\n SELECT c.record_id, c.tariff_plan, s.risk_score,\n        ROW_NUMBER() OVER (PARTITION BY c.tariff_plan ORDER BY s.risk_score DESC, c.record_id) AS priority\n FROM customers c JOIN model_scores s ON c.record_id = s.record_id\n WHERE c.split = 'validation'\n)\nSELECT * FROM ranked WHERE priority <= 5 ORDER BY tariff_plan, priority",
+    "rows": [
+      {
+        "record_id": "R0673",
+        "tariff_plan": 1,
+        "risk_score": 0.9816861271763232,
+        "priority": 1
+      },
+      {
+        "record_id": "R1200",
+        "tariff_plan": 1,
+        "risk_score": 0.9799842171717172,
+        "priority": 2
+      },
+      {
+        "record_id": "R1123",
+        "tariff_plan": 1,
+        "risk_score": 0.9776488295973588,
+        "priority": 3
+      },
+      {
+        "record_id": "R2873",
+        "tariff_plan": 1,
+        "risk_score": 0.9727509559121719,
+        "priority": 4
+      },
+      {
+        "record_id": "R2328",
+        "tariff_plan": 1,
+        "risk_score": 0.9542291666983369,
+        "priority": 5
+      },
+      {
+        "record_id": "R1089",
+        "tariff_plan": 2,
+        "risk_score": 0.6991366008056897,
+        "priority": 1
+      },
+      {
+        "record_id": "R2484",
+        "tariff_plan": 2,
+        "risk_score": 0.10217000592000591,
+        "priority": 2
+      },
+      {
+        "record_id": "R1596",
+        "tariff_plan": 2,
+        "risk_score": 0.09682961701095913,
+        "priority": 3
+      },
+      {
+        "record_id": "R1324",
+        "tariff_plan": 2,
+        "risk_score": 0.08523421564644966,
+        "priority": 4
+      },
+      {
+        "record_id": "R0185",
+        "tariff_plan": 2,
+        "risk_score": 0.05976199726199726,
+        "priority": 5
+      }
+    ]
+  },
+  {
+    "query": "SELECT SUM(CASE WHEN s.risk_score >= s.threshold AND c.churn=1 THEN 1 ELSE 0 END) AS true_positives,\n       SUM(CASE WHEN s.risk_score >= s.threshold AND c.churn=0 THEN 1 ELSE 0 END) AS false_positives,\n       SUM(CASE WHEN s.risk_score < s.threshold AND c.churn=1 THEN 1 ELSE 0 END) AS false_negatives,\n       SUM(CASE WHEN s.risk_score < s.threshold AND c.churn=0 THEN 1 ELSE 0 END) AS true_negatives\nFROM customers c JOIN model_scores s ON c.record_id = s.record_id WHERE c.split='test'",
+    "rows": [
+      {
+        "true_positives": 95,
+        "false_positives": 79,
+        "false_negatives": 3,
+        "true_negatives": 452
+      }
+    ]
+  },
+  {
+    "query": "SELECT feature_group, COUNT(DISTINCT split) AS partitions\nFROM customers GROUP BY feature_group HAVING COUNT(DISTINCT split) > 1",
+    "rows": []
+  }
+]

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Explore customer churn, evaluate the precision-recall tradeoff, and score profiles with a reproducible model trained on public telecom data.">
+  <title>ChurnLab · Customer retention analysis</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23102038'/%3E%3Cpath d='M8 23V15M16 23V8M24 23V12' stroke='%23b6f16b' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="vendor/d3.min.js"></script><script defer src="data.js"></script>
+  <script defer src="engine.js"></script><script defer src="app.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="#"><span class="brand-icon" aria-hidden="true">▥</span> ChurnLab<span class="brand-caption">CUSTOMER RETENTION</span></a>
+  <p class="nav-label">WORKSPACE</p>
+  <nav aria-label="Analysis views">
+    <button class="nav-button active" data-view="decision" aria-pressed="true"><span aria-hidden="true">◫</span> Decision lab</button>
+    <button class="nav-button" data-view="score" aria-pressed="false"><span aria-hidden="true">⊕</span> Score a customer</button>
+    <button class="nav-button" data-view="evidence" aria-pressed="false"><span aria-hidden="true">▤</span> Model evidence</button>
+  </nav>
+  <div class="sidebar-bottom"><span class="small-tag">PORTFOLIO PROJECT</span><p>Public telecom data.<br>Real model, offline evaluation.</p><a href="https://archive.ics.uci.edu/dataset/563/iranian+churn+dataset" target="_blank" rel="noreferrer">View data source ↗</a></div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><span>Analytics / <strong id="breadcrumb">Decision lab</strong></span><span class="dataset-tag">UCI Iranian Churn · 3,150 records</span></header>
+  <main>
+    <noscript>This dashboard needs JavaScript. The Python reports and SQL queries are available in the project folder.</noscript>
+    <div id="fatal" role="alert" hidden></div>
+    <section id="decision" class="view">
+      <div class="heading"><div><p class="eyebrow">RETENTION PLANNING</p><h1>Who should we contact?</h1><p class="subtitle">Explore the balance between finding churners and raising false alarms.</p></div><button id="reset" class="secondary">Reset to selected threshold</button></div>
+      <div class="context-line"><span class="chip">Validation sandbox</span><span id="validation-context"></span></div>
+      <div class="kpis" aria-live="polite">
+        <article class="kpi"><span>Churners caught · recall</span><strong id="recall">—</strong><p id="recall-detail"></p></article>
+        <article class="kpi"><span>Flagged correctly · precision</span><strong id="precision">—</strong><p id="precision-detail"></p></article>
+        <article class="kpi"><span>Customers to contact</span><strong id="flagged">—</strong><p id="flagged-detail"></p></article>
+        <article class="kpi"><span>Churners missed</span><strong id="missed">—</strong><p>Customers below the threshold who left</p></article>
+      </div>
+      <div class="analysis-grid">
+        <article class="panel threshold-panel">
+          <div class="panel-title"><div><h2>Choose a score threshold</h2><p>Lower values flag more customers.</p></div><output id="threshold-value" for="threshold">—</output></div>
+          <label class="sr-only" for="threshold">Score threshold</label><input id="threshold" type="range" min="1" max="99" step="1" value="50">
+          <div class="range-labels"><span>Broader reach</span><span>More selective</span></div>
+          <div class="chart-legend"><span class="legend-recall">Recall</span><span class="legend-precision">Precision</span></div>
+          <svg id="tradeoff" viewBox="0 0 700 260" role="img" aria-label="Precision and recall across score thresholds"></svg>
+          <p class="footnote">This control changes validation results only. Final test results remain fixed.</p>
+        </article>
+        <article class="panel"><div class="panel-title"><div><h2>What the flags mean</h2><p>Predictions compared with actual outcomes</p></div></div><div class="matrix">
+          <div class="matrix-cell tp"><span>Caught churners</span><strong id="tp"></strong><small>Flagged · actually left</small></div>
+          <div class="matrix-cell fp"><span>False alarms</span><strong id="fp"></strong><small>Flagged · actually stayed</small></div>
+          <div class="matrix-cell fn"><span>Missed churners</span><strong id="fn"></strong><small>Not flagged · actually left</small></div>
+          <div class="matrix-cell tn"><span>Correctly unflagged</span><strong id="tn"></strong><small>Not flagged · actually stayed</small></div>
+        </div><p class="footnote">A high score indicates model-estimated risk. It does not establish that an intervention will prevent churn.</p></article>
+      </div>
+      <article class="panel list-panel"><div class="panel-title"><div><h2>Highest-scoring validation profiles</h2><p>Anonymous record references for demonstration—not a live contact list.</p></div><div class="table-controls"><label for="tariff-filter" class="sr-only">Filter tariff</label><select id="tariff-filter"><option value="all">All tariffs</option><option value="1">Pay-as-you-go</option><option value="2">Contractual</option></select><button id="export" class="secondary">Export flagged CSV</button></div></div>
+      <div class="table-scroll"><table><thead><tr><th>Record</th><th>Tariff</th><th>Complaint</th><th>Model score</th><th>Decision</th><th>Actual outcome</th></tr></thead><tbody id="priority-rows"></tbody></table></div><p class="footnote" id="table-note"></p></article>
+    </section>
+    <section id="score" class="view" hidden>
+      <div class="heading"><div><p class="eyebrow">INSTANT MODEL SCORING</p><h1>Explore a customer profile</h1><p class="subtitle">Use information available at the end of the nine-month observation window.</p></div></div>
+      <div class="scoring-grid"><article class="panel"><div class="panel-title"><div><h2>Customer inputs</h2><p>Counts refer to the first nine months unless stated otherwise.</p></div></div><label for="example" class="field-label">Start from an observed validation profile</label><select id="example"></select><form id="score-form"><div id="input-fields" class="input-grid"></div><button class="primary" type="submit">Calculate model score</button><p id="input-error" role="alert" class="error"></p></form></article>
+      <article class="panel score-result" aria-live="polite"><span class="eyebrow">MODEL OUTPUT</span><strong id="profile-score">—</strong><p id="profile-decision"></p><div class="score-track"><div id="score-fill"></div></div><p id="profile-threshold"></p><hr><h2>How to read this result</h2><p>This is an uncalibrated model score, not a guaranteed chance of churn. Changing an input is a hypothetical scenario, not evidence of cause and effect.</p><p>All inputs must fall within the training data's observed ranges. Valid ranges do not guarantee a realistic combination.</p><p class="footnote">Scoring runs in this browser. Inputs are not saved or sent to a scoring service.</p></article></div>
+    </section>
+    <section id="evidence" class="view" hidden>
+      <div class="heading"><div><p class="eyebrow">REPRODUCIBLE EVALUATION</p><h1>Results you can inspect</h1><p class="subtitle">Models were selected on validation data. The final test report is locked.</p></div><a href="model-report.md" download class="secondary">Download model report</a></div>
+      <div class="kpis"><article class="kpi"><span>Test average precision</span><strong id="test-ap"></strong><p>Ranking quality across recall levels</p></article><article class="kpi"><span>Test recall</span><strong id="test-recall"></strong><p id="test-threshold"></p></article><article class="kpi"><span>Test precision</span><strong id="test-precision"></strong><p>Among profiles flagged at the fixed threshold</p></article><article class="kpi"><span>Lift in highest-scoring 10%</span><strong id="test-lift"></strong><p>Churn concentration versus the test cohort</p></article></div>
+      <div class="analysis-grid"><article class="panel"><div class="panel-title"><div><h2>Model comparison</h2><p>Validation data · precision and recall use threshold 0.50</p></div></div><div class="table-scroll"><table><thead><tr><th>Model</th><th>Avg. precision</th><th>Recall</th><th>Precision</th></tr></thead><tbody id="comparison"></tbody></table></div><p id="selection-note" class="footnote"></p><h3>Split integrity</h3><div id="split-bars"></div><p id="quality-note" class="footnote"></p></article>
+      <article class="panel"><div class="panel-title"><div><h2>Which inputs matter globally?</h2><p>Validation permutation importance</p></div></div><div id="importance"></div><p class="footnote">Bars show the drop in average precision when one input is shuffled, averaged over five repeats. Correlated inputs can share importance. These are not individual explanations or causal effects.</p></article></div>
+      <article class="panel methodology"><h2>Scope and limitations</h2><div class="method-grid"><div><h3>Prediction window</h3><p>UCI documents nine months of input observations and churn status at month 12. The three-month gap is the prediction window; exact customer-level dates are unavailable.</p></div><div><h3>Conservative input selection</h3><p>Status and customer value are excluded because their operational meaning or derivation needs additional verification. Age and age group are also excluded. This does not establish fairness.</p></div><div><h3>Repeated records</h3><p>Repeated records are retained because stable customer IDs are absent. Identical model-input profiles are grouped into a single split to reduce duplicate leakage.</p></div><div><h3>Before real business use</h3><p>This historical dataset comes from one telecom company. External and temporal validation, calibration, fairness assessment, monitoring, and an intervention experiment remain future work.</p></div></div><p class="source">Source: <a href="https://archive.ics.uci.edu/dataset/563/iranian+churn+dataset" target="_blank" rel="noreferrer">Iranian Churn (2020), UCI Machine Learning Repository</a> · DOI 10.24432/C5JW3Z · CC BY 4.0. Data cleaned, split, and modeled for this project.</p></article>
+    </section>
+    <footer>ChurnLab <span>Python · SQL · scikit-learn · D3</span><span>Historical data. Instant scoring. No live telecom connection.</span></footer>
+  </main>
+</div>
+</body>
+</html>

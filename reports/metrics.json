@@ -1,0 +1,249 @@
+{
+  "source": "https://archive.ics.uci.edu/dataset/563/iranian+churn+dataset",
+  "source_doi": "10.24432/C5JW3Z",
+  "rows": 3150,
+  "churners": 495,
+  "dataset_sha256": "90d5fb6bd1630cd4de4b4d28fcf8b4cb92a8f6ab7484605b0799d47386f7dbe1",
+  "raw_duplicate_rows": 300,
+  "repeated_feature_rows": 365,
+  "missing_cells": 0,
+  "selected_model": "Random forest",
+  "threshold": 0.14,
+  "splits": {
+    "train": {
+      "n": 1886,
+      "churners": 295,
+      "groups": 1672
+    },
+    "validation": {
+      "n": 635,
+      "churners": 102,
+      "groups": 562
+    },
+    "test": {
+      "n": 629,
+      "churners": 98,
+      "groups": 551
+    }
+  },
+  "comparison": [
+    {
+      "name": "Dummy baseline",
+      "n": 635,
+      "prevalence": 0.16062992125984252,
+      "average_precision": 0.16062992125984252,
+      "roc_auc": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f2": 0.0,
+      "threshold": 0.5,
+      "tn": 533,
+      "fp": 0,
+      "fn": 102,
+      "tp": 0,
+      "flagged": 0,
+      "top10_k": 64,
+      "top10_precision": 0.125,
+      "top10_recall": 0.0784313725490196,
+      "top10_lift": 0.7781862745098039
+    },
+    {
+      "name": "Logistic regression",
+      "n": 635,
+      "prevalence": 0.16062992125984252,
+      "average_precision": 0.7209374177675966,
+      "roc_auc": 0.9133557738292315,
+      "precision": 0.7884615384615384,
+      "recall": 0.4019607843137255,
+      "f2": 0.44565217391304346,
+      "threshold": 0.5,
+      "tn": 522,
+      "fp": 11,
+      "fn": 61,
+      "tp": 41,
+      "flagged": 52,
+      "top10_k": 64,
+      "top10_precision": 0.71875,
+      "top10_recall": 0.45098039215686275,
+      "top10_lift": 4.474571078431373
+    },
+    {
+      "name": "Random forest",
+      "n": 635,
+      "prevalence": 0.16062992125984252,
+      "average_precision": 0.8421335252620239,
+      "roc_auc": 0.9610694183864915,
+      "precision": 0.8813559322033898,
+      "recall": 0.5098039215686274,
+      "f2": 0.556745182012848,
+      "threshold": 0.5,
+      "tn": 526,
+      "fp": 7,
+      "fn": 50,
+      "tp": 52,
+      "flagged": 59,
+      "top10_k": 64,
+      "top10_precision": 0.84375,
+      "top10_recall": 0.5294117647058824,
+      "top10_lift": 5.252757352941177
+    }
+  ],
+  "validation": {
+    "n": 635,
+    "prevalence": 0.16062992125984252,
+    "average_precision": 0.8421335252620239,
+    "roc_auc": 0.9610694183864915,
+    "precision": 0.572289156626506,
+    "recall": 0.9313725490196079,
+    "f2": 0.8275261324041812,
+    "threshold": 0.14,
+    "tn": 462,
+    "fp": 71,
+    "fn": 7,
+    "tp": 95,
+    "flagged": 166,
+    "top10_k": 64,
+    "top10_precision": 0.84375,
+    "top10_recall": 0.5294117647058824,
+    "top10_lift": 5.252757352941177
+  },
+  "test": {
+    "n": 629,
+    "prevalence": 0.15580286168521462,
+    "average_precision": 0.8987217038122783,
+    "roc_auc": 0.9768054114301089,
+    "precision": 0.5459770114942529,
+    "recall": 0.9693877551020408,
+    "f2": 0.8392226148409894,
+    "threshold": 0.14,
+    "tn": 452,
+    "fp": 79,
+    "fn": 3,
+    "tp": 95,
+    "flagged": 174,
+    "top10_k": 63,
+    "top10_precision": 0.9365079365079365,
+    "top10_recall": 0.6020408163265306,
+    "top10_lift": 6.010851959831552
+  },
+  "importance": [
+    {
+      "feature": "complains",
+      "label": "Any complaint (0/1)",
+      "importance": 0.30023314438700954,
+      "std": 0.04502892609223513
+    },
+    {
+      "feature": "seconds_of_use",
+      "label": "Call duration (seconds)",
+      "importance": 0.10036097641558828,
+      "std": 0.010874978388133158
+    },
+    {
+      "feature": "call_failure",
+      "label": "Call failures",
+      "importance": 0.09101901062020594,
+      "std": 0.004738862354555637
+    },
+    {
+      "feature": "frequency_of_use",
+      "label": "Number of calls",
+      "importance": 0.08588904542878535,
+      "std": 0.01031154687274957
+    },
+    {
+      "feature": "subscription_length",
+      "label": "Subscription months",
+      "importance": 0.05342885683449996,
+      "std": 0.012831179264119117
+    },
+    {
+      "feature": "frequency_of_sms",
+      "label": "Number of SMS",
+      "importance": 0.03439514945008175,
+      "std": 0.0069875263354764695
+    },
+    {
+      "feature": "distinct_called_numbers",
+      "label": "Distinct called numbers",
+      "importance": 0.01918090120693674,
+      "std": 0.007756451114049436
+    },
+    {
+      "feature": "charge_amount",
+      "label": "Charge band",
+      "importance": 0.016780504153669364,
+      "std": 0.006547032260281928
+    },
+    {
+      "feature": "tariff_plan",
+      "label": "Tariff (1=pay-as-you-go, 2=contract)",
+      "importance": -0.00021729156508070168,
+      "std": 0.0005980556864124878
+    }
+  ],
+  "labels": [
+    "Call failures",
+    "Any complaint (0/1)",
+    "Subscription months",
+    "Charge band",
+    "Call duration (seconds)",
+    "Number of calls",
+    "Number of SMS",
+    "Distinct called numbers",
+    "Tariff (1=pay-as-you-go, 2=contract)"
+  ],
+  "bounds": {
+    "call_failure": {
+      "min": 0.0,
+      "max": 36.0,
+      "median": 6.0
+    },
+    "complains": {
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.0
+    },
+    "subscription_length": {
+      "min": 3.0,
+      "max": 46.0,
+      "median": 35.0
+    },
+    "charge_amount": {
+      "min": 0.0,
+      "max": 10.0,
+      "median": 0.0
+    },
+    "seconds_of_use": {
+      "min": 0.0,
+      "max": 16980.0,
+      "median": 2978.0
+    },
+    "frequency_of_use": {
+      "min": 0.0,
+      "max": 254.0,
+      "median": 54.0
+    },
+    "frequency_of_sms": {
+      "min": 0.0,
+      "max": 522.0,
+      "median": 20.0
+    },
+    "distinct_called_numbers": {
+      "min": 0.0,
+      "max": 97.0,
+      "median": 21.0
+    },
+    "tariff_plan": {
+      "min": 1.0,
+      "max": 2.0,
+      "median": 1.0
+    }
+  },
+  "versions": {
+    "python": "3.12.14",
+    "pandas": "3.0.1",
+    "numpy": "2.5.3",
+    "sklearn": "1.9.1"
+  }
+}

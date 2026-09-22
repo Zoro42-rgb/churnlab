@@ -1,0 +1,4 @@
+* text=auto eol=lf
+data/raw/customer_churn.csv -text
+*.joblib -text
+*.sqlite -text
